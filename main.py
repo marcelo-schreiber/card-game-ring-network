@@ -67,18 +67,16 @@ class Node:
 
 if __name__ == "__main__":
     # Define the addresses for each node in the network
-    node1 = Node(('localhost', 10001), ('localhost', 10002))
-    node2 = Node(('localhost', 10002), ('localhost', 10003))
-    node3 = Node(('localhost', 10003), ('localhost', 10001))
+    input_address = input("Enter the address of the node: ")
+    input_next_address = input("Enter the address of the next node: ")
 
-    nodes = [node1, node2, node3]
+    port = int(input_address.split(":")[1])
+    next_port = int(input_next_address.split(":")[1])
 
-    for node in nodes:
-        threading.Thread(target=node.run).start()
-
-    # send the token to the first node
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto("TOKEN".encode(), node1.address)
-
-    while True:
-        time.sleep(1)
+    input_next_address = input("Voce quer o bastao? (s/n): ") 
+    
+    if input_next_address == "s":
+        node1 = Node((input_address, port), (input_next_address, next_port), True)
+    else:
+        node2 = Node((input_address, port), (input_next_address, next_port), False)
+    
