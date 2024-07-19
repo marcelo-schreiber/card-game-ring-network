@@ -70,8 +70,8 @@ if __name__ == "__main__":
     input_address = input("Enter the address of the node: ")
     input_next_address = input("Enter the address of the next node: ")
 
-    port = int(input_address.split(":")[1])
-    next_port = int(input_next_address.split(":")[1])
+    port = int(input("Enter the port of the node: "))
+    next_port = int(input("Enter the port of the next node: "))
 
     input_next_address = input("Voce quer o bastao? (s/n): ") 
     
