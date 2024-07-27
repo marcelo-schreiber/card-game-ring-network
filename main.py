@@ -60,7 +60,11 @@ class Node:
                 elif int(msg_address) == self.address[1]: # If the message is from me
                     if ack == "1":
                         print(f"Found an ACK for the message I sent, sending token")
-                        self.send_token() # TODO: some timeout mechanism, a node can send multiple times
+                        want_to_send_token = input("Do you want to send the token? (y/n): ")
+                        if want_to_send_token == "y":
+                            self.send_token()
+                        else:
+                            self.send_data()
                 else:
                     self.sock.sendto(data.encode(), self.next_address)
 
