@@ -165,7 +165,7 @@ class MessageHandler:
             mesa.append((jogador, carta))
             
         vencedor = max(mesa, key=lambda x: self.cardGame.calculate_card_value(x[1]))  # Determina a maior carta
-        vencedor[0].roundsWonCount += 1
+        # vencedor[0].roundsWonCount += 1
         
         return {
             "type": "update_round",
