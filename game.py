@@ -221,53 +221,62 @@ alice = MessageHandler(players, "Alice", is_dealer=True)
 bob = MessageHandler(players, "Bob")
 charlie = MessageHandler(players, "Charlie")
 
-# # Distribute cards
-distribution = alice.send_distribution()
 
-bob.receive_distribution(distribution['data'])
-charlie.receive_distribution(distribution['data'])
-alice.receive_distribution(distribution['data'])
+i = 0
+while True:
+    # # Distribute cards
+    distribution = alice.send_distribution()
 
-# Bet
-bet = alice.send_bet()
-bob.receive_bet(bet['data'])
-bet = bob.send_bet(bet['data'])
-charlie.receive_bet(bet['data'])
-bet = charlie.send_bet(bet['data'])
-alice.receive_bet(bet['data'])
+    bob.receive_distribution(distribution['data'])
+    charlie.receive_distribution(distribution['data'])
+    alice.receive_distribution(distribution['data'])
 
-# # Share bet
-share_bet = alice.send_share_bet(bet['data'])
-bob.receive_share_bet(share_bet['data'])
-charlie.receive_share_bet(share_bet['data'])
-print('share_bet', share_bet['data'])
+    # Bet
+    bet = alice.send_bet()
+    bob.receive_bet(bet['data'])
+    bet = bob.send_bet(bet['data'])
+    charlie.receive_bet(bet['data'])
+    bet = charlie.send_bet(bet['data'])
+    alice.receive_bet(bet['data'])
 
-for _ in range(12):
-    # Play round
-    play_round = alice.send_play_round()
-    bob.receive_play_round(play_round['data'])
-    play_round = bob.send_play_round(play_round['data'])
-    charlie.receive_play_round(play_round['data'])
-    play_round = charlie.send_play_round(play_round['data'])
-    alice.receive_play_round(play_round['data'])
+    # # Share bet
+    share_bet = alice.send_share_bet(bet['data'])
+    bob.receive_share_bet(share_bet['data'])
+    charlie.receive_share_bet(share_bet['data'])
+    print('share_bet', share_bet['data'])
 
-    # print('round', play_round)
 
-    # # Update round
-    update_round = alice.send_update_round()
-    bob.receive_update_round(update_round['data'])
-    charlie.receive_update_round(update_round['data'])
-    alice.receive_update_round(update_round['data'])
+    for _ in range(13-i):
+        # Play round
+        play_round = alice.send_play_round()
+        bob.receive_play_round(play_round['data'])
+        play_round = bob.send_play_round(play_round['data'])
+        charlie.receive_play_round(play_round['data'])
+        play_round = charlie.send_play_round(play_round['data'])
+        alice.receive_play_round(play_round['data'])
+
+        # # Update round
+        update_round = alice.send_update_round()
+        bob.receive_update_round(update_round['data'])
+        charlie.receive_update_round(update_round['data'])
+        alice.receive_update_round(update_round['data'])
+        
+        print('update_round', update_round['data'])
+
+    # # Update results
+    update_results = alice.send_update_results()
+    bob.receive_update_results(update_results['data'])
+    charlie.receive_update_results(update_results['data'])
+    alice.receive_update_results(update_results['data'])
+    print('update_results', update_results)
+
+    if alice.cardGame.is_game_over():
+        print('winner: ', alice.cardGame.get_winner())
+        break
+
+
+    i += 1
     
-    print('update_round', update_round['data'])
-
-# # Update results
-update_results = alice.send_update_results()
-bob.receive_update_results(update_results['data'])
-charlie.receive_update_results(update_results['data'])
-alice.receive_update_results(update_results['data'])
-
-print('update_results', update_results)
 
 
 print('-=' * 20)
