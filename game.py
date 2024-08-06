@@ -1,11 +1,15 @@
 import random
 
+# esse módulo simula o jogo em cada máquina que está jogando, não lida com redes
+
 class Deck:
     cardSuits = ['♦', '♠', '♥', '♣']
     cardValues = ['4', '5', '6', '7', 'J', 'Q', 'K', 'A', '2', '3']
 
     def __init__(self):
         self.cards = [f"{valor}{naipe}" for valor in self.cardValues for naipe in self.cardSuits]
+        #duplica o baralho
+        self.cards += [f"{valor}{naipe}" for valor in self.cardValues for naipe in self.cardSuits]
         random.shuffle(self.cards)
 
     def deal_cards(self, player_count, card_count):
@@ -20,16 +24,20 @@ class Deck:
 class Player:
     def __init__(self, name):
         self.name = name
-        self.lifeCount = 13
+        self.lifeCount = 12
         self.cards = []
         self.prediction = 0
         self.roundsWonCount = 0
+        self.isDealer = False
 
     def set_cards(self, cards):
         self.cards = cards
 
     def set_prediction(self, prediction):
         self.prediction = prediction
+
+    def set_dealer(self, isDealer):
+        self.isDealer = isDealer
 
     def drop_card(self, card=None, should_pop = False):
         if not card:
