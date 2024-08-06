@@ -1,7 +1,6 @@
 import socket
 import random
 from time import sleep
-import json
 
 class Deck:
     cardSuits = ['♦', '♠', '♥', '♣']
@@ -122,7 +121,7 @@ def criaPlayerLocal(Player_A, Player_B, Player_C, Player_D, player_letter):
 
 def send_token(node):
     node.has_token = False
-    node.sock.sendto
+    node.sock.sendto("TOKEN".encode(), node.next_address)
 
 def send_confirmation(node, player_dest):
     tipo = "confirmation"
@@ -154,6 +153,7 @@ def sendBetsDealer(node, player_local, players):
     apostas_list = apostas.split(" ")
     for i in range(len(players)):
         players[i].set_prediction(apostas_list[i])
+
     tellBets(node, apostas, player_local, players)
 
 def tellBets(node, apostas, player_local, players):
@@ -202,8 +202,9 @@ def sendBetsNonDealer(node):
             break
 
 def send_cards(node, cards, player_dest):
-    if not node.has_token and not frame:
+    if not node.has_token:
             return
+    
     tipo = "cards"
     cards_str = " ".join(cards)
     frame = f"{tipo}:{cards_str}:{player_dest}"
@@ -225,11 +226,17 @@ def enviaTodasAsCartas(hands, node, player_local, players):
             send_cards(node, hands[i], players[i].name)
     send_confirmation(node, player_local.name)
 
-def listen_cards(node, player_local):
+def listen_cards_or_dealer_change(node, player_local):
     while True:
         data, addr = node.sock.recvfrom(1024)
         msg = data.decode()
+        if msg == "TOKEN":
+            node.has_token = True
+            player_local.set_dealer(True)
+            break
+
         tip, cards_str, player_d = msg.split(":")
+            
 
         if tip == "cards":
             if player_d == player_local.name:
@@ -393,13 +400,10 @@ if __name__ == "__main__":
     Player_D = Player('D')
     Player_A.set_dealer(True)
     Player_local = criaPlayerLocal(Player_A, Player_B, Player_C, Player_D, player_letter)
-    Player_dealer = Player_A
 
     players = [Player_A, Player_B, Player_C, Player_D]
 
-
-
-    cardNum = 4
+    cardNum = 2
 
     while not terminouJogo(players):
         if Player_local.isDealer:
@@ -407,26 +411,41 @@ if __name__ == "__main__":
             hands = deck.deal_cards(len(players), cardNum)
             enviaTodasAsCartas(hands, node, Player_local, players)
         else:
-            listen_cards(node, Player_local)
+            listen_cards_or_dealer_change(node, Player_local)
+            if Player_local.isDealer: # se o dealer mudou
+                continue # volta pro começo do loop
+
         imprimeCartas(Player_local)
+
         if Player_local.isDealer:
             sendBetsDealer(node, Player_local, players)
         else:
             sendBetsNonDealer(node)
             receiveBets(node, players)
+
         while len(Player_local.cards) != 0:
             if Player_local.isDealer:
                 throwCardDealer(node, Player_local, players)
             else:
                 throwCardNonDealer(node, Player_local)
                 receiveRoundResults(node, players)
+
         if Player_local.isDealer:
             sendHandResults(node, players, Player_local)
         else:
             receiveHandResults(node, players)
+
         for player in players:
             player.updateLifeCount()
+
         imprimeVida(players)
+
+        if Player_local.isDealer:
+            sleep(0.1) # espera para que o proximo jogador esteja pronto
+            send_token(node)      
+            Player_local.set_dealer(False)  
+        
+        # set the dealer for all instances
         if cardNum == 1:
             cardNum = 4
         else:
